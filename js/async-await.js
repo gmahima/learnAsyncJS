@@ -5,7 +5,25 @@ const btn = document.querySelector('button');
 
 // Handle all fetch requests
 
+async function getJson() {
+  try{
+    const response = await fetch(url);
+    return await response.json();
+  }
+  catch(error) {
+    throw(error);
+  }
+}
 
+async function getProfiles(url) {
+  const astroList = await getJson(url);
+  const profileList = astroList.people.map(async (person) => {
+    const craft = person.craft;
+    const personJson = await getJson(wikiUrl + person.name);
+    return {...personJson, craft}
+  })
+  return Promise.all(profieList);
+}
 // Generate the markup for each profile
 function generateHTML(data) {
   data.map( person => {
@@ -21,7 +39,14 @@ function generateHTML(data) {
   });
 }
 
-btn.addEventListener('click', (event) => {
+btn.addEventListener('click', async (event) => {
   event.target.textContent = "Loading...";
-
+  getProfiles(astrosUrl)
+  .then(generateHTML)
+  .catch((error) => {
+    console.error(error);
+  })
+  .finally(() => {
+    event.target.remove()
+  }); 
 });
